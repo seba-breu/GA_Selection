@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.env
+*.venv
+
+# Conda environment folders
+env/
+.conda/
+.condarc
+*.yml
+
+# VS Code
+.vscode/
+
+# Jupyter
+.ipynb_checkpoints/

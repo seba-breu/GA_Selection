@@ -1,0 +1,1 @@
+conda install numpy pandas scikit-learn matplotlib seaborn scipy joblib

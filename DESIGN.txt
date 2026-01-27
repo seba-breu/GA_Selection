@@ -1,0 +1,12 @@
+# Genetic gene selection through logistic regression algorithm
+
+### Objective
+
+Identifying important genes that contribute the most information for correctly label prediction (benign/malignant).
+
+### How?
+Using genetic algorithm for subset gene selection that maximize the prediction according to the following workflow:
+
+1.   Vector construction: each individual is represented by a binary vector within genes selected are represented by 1 or unselected by 0.
+
+For instance within $N = 1, 2, ..., ni$. $\vec{v1} = [1, 0, 1, ..., ni]$

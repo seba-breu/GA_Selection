@@ -60,7 +60,10 @@ if MODE == "elitist":
 
     # Map indices to feature names
     selected_feature_names = get_selected_feature_names(feature_names, selected_indices)
-    print("Selected feature names:", selected_feature_names)
+    print("Selected features:")
+    for f in selected_feature_names:
+        print("-", str(f))
+        
 
 else:  # exploratory mode
     # Run exploratory GA: returns all individuals and fitnesses

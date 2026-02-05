@@ -21,12 +21,13 @@ def load_breast_cancer_data(as_dataframe=False):
     data = load_breast_cancer()
     X = data.data
     y = data.target
-    
+    feature_names = data.feature_names
+
     if as_dataframe:
         X = pd.DataFrame(X, columns=data.feature_names)
         y = pd.Series(y)
     
-    return X, y
+    return X, y, feature_names
 
 def train_val_split(X, y, test_size=0.2, random_state=42, stratify=True):
     """

@@ -26,7 +26,7 @@ if MODE not in ["elitist", "exploratory"]:
     raise ValueError("Mode must be 'elitist' or 'exploratory'")
 
 # ------------------------ Load and Prepare Data ------------------------ #
-X, y = load_breast_cancer_data(as_dataframe=True)
+X, y, feature_names = load_breast_cancer_data(as_dataframe=True)
 # Convert to numpy arrays for processing (after splitting to avoid data leakage)
 X = X.values
 y = y.values
@@ -59,7 +59,7 @@ if MODE == "elitist":
     X_val_sel = X_val_norm[:, selected_indices]
 
     # Map indices to feature names
-    selected_feature_names = get_selected_feature_names(X_train.columns, selected_indices)
+    selected_feature_names = get_selected_feature_names(feature_names, selected_indices)
     print("Selected feature names:", selected_feature_names)
 
 else:  # exploratory mode

@@ -55,7 +55,7 @@ def evaluate_fold(X_train, X_val, y_train, y_vald):
 
     model = LogisticRegression(
         max_iter=1000,
-        solvers='liblinear'    
+        solver='liblinear'    
     )
     
     model.fit(X_train_scaled, y_train)

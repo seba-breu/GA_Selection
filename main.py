@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from data_utils import (
-    load_breast_cancer,
+    load_breast_cancer_data,
     train_val_split,
     normalize_features,
     track_indices,
@@ -26,7 +26,10 @@ if MODE not in ["elitist", "exploratory"]:
     raise ValueError("Mode must be 'elitist' or 'exploratory'")
 
 # ------------------------ Load and Prepare Data ------------------------ #
-X, y = load_breast_cancer(as_dataframe=True)
+X, y = load_breast_cancer_data(as_dataframe=True)
+# Convert to numpy arrays for processing (after splitting to avoid data leakage)
+X = X.values
+y = y.values
 X_train, X_val, y_train, y_val = train_val_split(
     X, y, test_size=0.2, random_state=RANDOM_STATE, stratify=True
 )

@@ -70,7 +70,7 @@ def compute_fitness(
     X,
     y,
     k_folds=5,
-    alpha=0.5,
+    alpha=0.001,
     random_state=None
 ):
     """

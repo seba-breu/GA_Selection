@@ -124,10 +124,14 @@ def run_genetic_algorithm(
         return all_individuals, all_fitnesses
 
     elif mode == "elitist":
-        # Standard GA with elitism
+        """
+        Standard GA with elitism: keep top individuals each generation.
+        This version ensures that multiple relevant features are selected
+        by combining top candidates with maximal fitness.
+        """
         population = initialize_binary_vector(pop_size, num_features, random_state)
         fitness_scores = np.array([compute_fitness(ind, X, y, k_folds, alpha, random_state)
-                                   for ind in population])
+                                for ind in population])
 
         for gen in range(num_generations):
             new_population = []
@@ -145,7 +149,7 @@ def run_genetic_algorithm(
             # Combine parents + children
             combined_population = np.vstack([population, new_population])
             combined_fitness = np.array([compute_fitness(ind, X, y, k_folds, alpha, random_state)
-                                         for ind in combined_population])
+                                        for ind in combined_population])
 
             # Keep the top pop_size individuals
             best_indices = np.argsort(combined_fitness)[-pop_size:]
@@ -154,8 +158,19 @@ def run_genetic_algorithm(
 
             print(f"Generation {gen+1}: Best fitness = {fitness_scores.max():.4f}")
 
-        best_idx = np.argmax(fitness_scores)
-        return population[best_idx], fitness_scores[best_idx]
+        # ------------------------ Combine top candidates to select multiple features ------------------------ #
+        max_fitness = fitness_scores.max()
+        candidates = population[fitness_scores == max_fitness]
+
+        # Calculate feature frequency in top candidates
+        feature_frequency = candidates.sum(axis=0) / len(candidates)
+
+        # Select features that appear in at least 30% of top individuals
+        threshold = 0.3
+        best_individual = (feature_frequency >= threshold).astype(int)
+        best_fitness = max_fitness
+
+        return best_individual, best_fitness
 
     else:
         raise ValueError("mode must be 'exploratory' or 'elitist'")

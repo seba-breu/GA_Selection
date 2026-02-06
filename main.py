@@ -27,7 +27,7 @@ if MODE not in ["elitist", "exploratory"]:
 
 # ------------------------ Load and Prepare Data ------------------------ #
 X, y, feature_names = load_breast_cancer_data(as_dataframe=True)
-# Convert to numpy arrays for processing (after splitting to avoid data leakage)
+# Convert to numpy arrays for processing
 X = X.values
 y = y.values
 X_train, X_val, y_train, y_val = train_val_split(
@@ -63,7 +63,6 @@ if MODE == "elitist":
     print("Selected features:")
     for f in selected_feature_names:
         print("-", str(f))
-        
 
 else:  # exploratory mode
     # Run exploratory GA: returns all individuals and fitnesses
@@ -94,62 +93,52 @@ else:  # exploratory mode
     # Plot top gene frequencies
     top_10_freqs = [gene_frequency[i] for i in top_10_indices]
     plt.figure(figsize=(12, 6))
-
-    plt.bar(
-        range(len(top_10_names)),
-        top_10_freqs,
-        tick_label=top_10_names
-    )
-
+    plt.bar(range(len(top_10_names)), top_10_freqs, tick_label=top_10_names)
     plt.xticks(rotation=45, ha="right")
     plt.xlabel("Feature name")
     plt.ylabel("Frequency in GA population")
-    plt.title("Top 10 Features frequently selected by the genetic algorithm during the exploratory phase")
-
+    plt.title("Top 10 Features frequently selected by the genetic algorithm")
     plt.tight_layout()
     plt.savefig("gene_frequencies.png", dpi=300, bbox_inches="tight")
     plt.show()
 
     # ------------------------ Progressive Feature Selection ------------------------ #
-selected_indices, performance_list = progressive_feature_selection(
-    X_train_norm,
-    y_train,
-    ranked_indices,
-    alpha=ALPHA,
-    k_folds=K_FOLDS
-)
+    selected_indices, performance_list = progressive_feature_selection(
+        X_train_norm,
+        y_train,
+        ranked_indices,
+        alpha=ALPHA,
+        k_folds=K_FOLDS
+    )
 
-best_fitness = max(f for _, f in performance_list)
-num_features_to_select = max(n for n, f in performance_list if f == best_fitness)
+    best_fitness = max(f for _, f in performance_list)
+    num_features_to_select = max(n for n, f in performance_list if f == best_fitness)
+    selected_indices = selected_indices[:num_features_to_select]
+    selected_feature_names = [str(feature_names[i]) for i in selected_indices]
 
-selected_indices_final = selected_indices[:num_features_to_select]
-selected_feature_names = [str(feature_names[i]) for i in selected_indices_final]
+    print("Selected feature names after progressive selection:")
+    for f in selected_feature_names:
+        print(" -", f)
 
-print("Selected feature names after progressive selection:")
-for f in selected_feature_names:
-    print(" -", f)
-
-print("\nPerformance at each step (number of features selected, fitness):")
-for n_features, fitness in performance_list:
-    print(f"{n_features:2d} features -> fitness: {float(fitness):.3f}")
-
+    print("\nPerformance at each step (number of features selected, fitness):")
+    for n_features, fitness in performance_list:
+        print(f"{n_features:2d} features -> fitness: {float(fitness):.3f}")
 
     # Plot performance progression
-num_features_list = [x[0] for x in performance_list]
-fitness_list = [x[1] for x in performance_list]
+    num_features_list = [x[0] for x in performance_list]
+    fitness_list = [x[1] for x in performance_list]
+    plt.figure(figsize=(8,4))
+    plt.plot(num_features_list, fitness_list, marker='o')
+    plt.xlabel("Number of Features Selected")
+    plt.ylabel("Fitness")
+    plt.title("Progressive Feature Selection Performance")
+    plt.grid(True)
+    plt.savefig("progressive_selection.png", dpi=300, bbox_inches='tight')
+    plt.show()
 
-plt.figure(figsize=(8,4))
-plt.plot(num_features_list, fitness_list, marker='o')
-plt.xlabel("Number of Features Selected")
-plt.ylabel("Fitness")
-plt.title("Progressive Feature Selection Performance")
-plt.grid(True)
-plt.savefig("progressive_selection.png", dpi=300, bbox_inches='tight')
-plt.show()
-
-    # ------------------------ Prepare Final Datasets ------------------------ #
-X_train_sel = X_train_norm[:, selected_indices_final]
-X_val_sel = X_val_norm[:, selected_indices_final]
+    # Prepare final datasets
+    X_train_sel = X_train_norm[:, selected_indices]
+    X_val_sel = X_val_norm[:, selected_indices]
 
 # ------------------------ Final Dataset Info ------------------------ #
 print("\nFinal X_train shape:", X_train_sel.shape)

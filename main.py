@@ -84,49 +84,72 @@ else:  # exploratory mode
 
     # ------------------------ Gene Ranking ------------------------ #
     ranked_indices, gene_frequency = rank_genes(all_individuals, all_fitnesses)
-    print("Top 10 ranked feature indices:", ranked_indices[:10])
+    top_10_indices = ranked_indices[:10]
+    top_10_names = [str(feature_names[i]) for i in top_10_indices]
+
+    print("Top 10 ranked feature names:")
+    for f in top_10_names:
+        print(" -", f)
 
     # Plot top gene frequencies
-    top_genes = ranked_indices[:15]
-    top_freqs = [gene_frequency[i] for i in top_genes]
+    top_10_freqs = [gene_frequency[i] for i in top_10_indices]
+    plt.figure(figsize=(12, 6))
 
-    plt.figure(figsize=(10,5))
-    plt.bar(range(len(top_genes)), top_freqs, tick_label=top_genes)
-    plt.xlabel("Feature Index")
-    plt.ylabel("Frequency in GA Population")
-    plt.title("Top 15 Feature Frequencies in Exploratory GA")
-    plt.savefig("gene_frequencies.png", dpi=300, bbox_inches='tight')  # save figure
+    plt.bar(
+        range(len(top_10_names)),
+        top_10_freqs,
+        tick_label=top_10_names
+    )
+
+    plt.xticks(rotation=45, ha="right")
+    plt.xlabel("Feature name")
+    plt.ylabel("Frequency in GA population")
+    plt.title("Top 10 Features frequently selected by the genetic algorithm during the exploratory phase")
+
+    plt.tight_layout()
+    plt.savefig("gene_frequencies.png", dpi=300, bbox_inches="tight")
     plt.show()
 
     # ------------------------ Progressive Feature Selection ------------------------ #
-    selected_indices, performance_list = progressive_feature_selection(
-        X_train_norm,
-        y_train,
-        ranked_indices,
-        alpha=ALPHA,
-        k_folds=K_FOLDS
-    )
+selected_indices, performance_list = progressive_feature_selection(
+    X_train_norm,
+    y_train,
+    ranked_indices,
+    alpha=ALPHA,
+    k_folds=K_FOLDS
+)
 
-    selected_feature_names = get_feature_names_from_indices(X_train.columns, selected_indices)
-    print("Selected feature names after progressive selection:", selected_feature_names)
-    print("Performance at each step (num_features, fitness):", performance_list)
+best_fitness = max(f for _, f in performance_list)
+num_features_to_select = max(n for n, f in performance_list if f == best_fitness)
+
+selected_indices_final = selected_indices[:num_features_to_select]
+selected_feature_names = [str(feature_names[i]) for i in selected_indices_final]
+
+print("Selected feature names after progressive selection:")
+for f in selected_feature_names:
+    print(" -", f)
+
+print("\nPerformance at each step (number of features selected, fitness):")
+for n_features, fitness in performance_list:
+    print(f"{n_features:2d} features -> fitness: {float(fitness):.3f}")
+
 
     # Plot performance progression
-    num_features_list = [x[0] for x in performance_list]
-    fitness_list = [x[1] for x in performance_list]
+num_features_list = [x[0] for x in performance_list]
+fitness_list = [x[1] for x in performance_list]
 
-    plt.figure(figsize=(8,4))
-    plt.plot(num_features_list, fitness_list, marker='o')
-    plt.xlabel("Number of Features Selected")
-    plt.ylabel("Fitness")
-    plt.title("Progressive Feature Selection Performance")
-    plt.grid(True)
-    plt.savefig("progressive_selection.png", dpi=300, bbox_inches='tight')  # save figure
-    plt.show()
+plt.figure(figsize=(8,4))
+plt.plot(num_features_list, fitness_list, marker='o')
+plt.xlabel("Number of Features Selected")
+plt.ylabel("Fitness")
+plt.title("Progressive Feature Selection Performance")
+plt.grid(True)
+plt.savefig("progressive_selection.png", dpi=300, bbox_inches='tight')
+plt.show()
 
     # ------------------------ Prepare Final Datasets ------------------------ #
-    X_train_sel = X_train_norm[:, selected_indices]
-    X_val_sel = X_val_norm[:, selected_indices]
+X_train_sel = X_train_norm[:, selected_indices_final]
+X_val_sel = X_val_norm[:, selected_indices_final]
 
 # ------------------------ Final Dataset Info ------------------------ #
 print("\nFinal X_train shape:", X_train_sel.shape)

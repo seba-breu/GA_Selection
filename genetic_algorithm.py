@@ -63,7 +63,7 @@ def run_genetic_algorithm(
     X,
     y,
     pop_size=20,
-    num_generations=30,
+    num_generations=50,
     mutation_rate=0.05,
     alpha=0.01,
     k_folds=5,
